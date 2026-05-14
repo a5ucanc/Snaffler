@@ -42,8 +42,6 @@ namespace Snaffler
         {
             // prime the hoststring lazy instantiator
             hostString();
-            // print the thing
-            PrintBanner();
             // set up the message queue for operation
             BlockingMq.MakeMq();
             // get a handle to the message queue singleton
@@ -60,6 +58,9 @@ namespace Snaffler
                     // bail out because the user was just running help
                     return;
                 }
+
+                // print the thing
+                PrintBanner();
 
                 // set up the  TSV output if the flag is set
                 if (Options.LogTSV)
@@ -89,67 +90,78 @@ namespace Snaffler
                 // Targets where to log to: File and Console
                 if (Options.LogToConsole)
                 {
-                    logconsole = new ColoredConsoleTarget("logconsole")
+                    if (Options.NoColor)
                     {
-                        DetectOutputRedirected = true,
-                        UseDefaultRowHighlightingRules = false,
-                        WordHighlightingRules =
+                        var consoleTarget = new ConsoleTarget("logconsole")
                         {
-                            new ConsoleWordHighlightingRule("{Green}", ConsoleOutputColor.DarkGreen,
-                                ConsoleOutputColor.White),
-                            new ConsoleWordHighlightingRule("{Yellow}", ConsoleOutputColor.DarkYellow,
-                                ConsoleOutputColor.White),
-                            new ConsoleWordHighlightingRule("{Red}", ConsoleOutputColor.DarkRed,
-                                ConsoleOutputColor.White),
-                            new ConsoleWordHighlightingRule("{Black}", ConsoleOutputColor.Black,
-                                ConsoleOutputColor.White),
-
-                            new ConsoleWordHighlightingRule("[Trace]", ConsoleOutputColor.DarkGray,
-                                ConsoleOutputColor.Black),
-                            new ConsoleWordHighlightingRule("[Degub]", ConsoleOutputColor.Gray,
-                                ConsoleOutputColor.Black),
-                            new ConsoleWordHighlightingRule("[Info]", ConsoleOutputColor.White,
-                                ConsoleOutputColor.Black),
-                            new ConsoleWordHighlightingRule("[Error]", ConsoleOutputColor.Magenta,
-                                ConsoleOutputColor.Black),
-                            new ConsoleWordHighlightingRule("[Fatal]", ConsoleOutputColor.Red,
-                                ConsoleOutputColor.Black),
-                            new ConsoleWordHighlightingRule("[File]", ConsoleOutputColor.Green,
-                                ConsoleOutputColor.Black),
-                            new ConsoleWordHighlightingRule("[Share]", ConsoleOutputColor.Yellow,
-                                ConsoleOutputColor.Black),
-                            new ConsoleWordHighlightingRule
-                            {
-                                CompileRegex = true,
-                                Regex = @"<.*\|.*\|.*\|.*?>",
-                                ForegroundColor = ConsoleOutputColor.Cyan,
-                                BackgroundColor = ConsoleOutputColor.Black
-                            },
-                            new ConsoleWordHighlightingRule
-                            {
-                                CompileRegex = true,
-                                Regex = @"^\d\d\d\d-\d\d\-\d\d \d\d:\d\d:\d\d [\+-]\d\d:\d\d ",
-                                ForegroundColor = ConsoleOutputColor.DarkGray,
-                                BackgroundColor = ConsoleOutputColor.Black
-                            },
-                            new ConsoleWordHighlightingRule
-                            {
-                                CompileRegex = true,
-                                Regex = @"\((?:[^\)]*\)){1}",
-                                ForegroundColor = ConsoleOutputColor.DarkMagenta,
-                                BackgroundColor = ConsoleOutputColor.Black
-                            }
-                        }
-                    };
-                    if (LogLevel == LogLevel.Warn)
-                    {
-                        nlogConfig.AddRule(LogLevel.Warn, LogLevel.Warn, logconsole);
+                            Layout = "${message}"
+                        };
+                        nlogConfig.AddRule(LogLevel == LogLevel.Warn ? LogLevel.Warn : LogLevel, LogLevel.Fatal, consoleTarget);
                     }
                     else
                     {
-                        nlogConfig.AddRule(LogLevel, LogLevel.Fatal, logconsole);
+                        logconsole = new ColoredConsoleTarget("logconsole")
+                        {
+                            DetectOutputRedirected = true,
+                            UseDefaultRowHighlightingRules = false,
+                            WordHighlightingRules =
+                            {
+                                new ConsoleWordHighlightingRule("{Green}", ConsoleOutputColor.DarkGreen,
+                                    ConsoleOutputColor.White),
+                                new ConsoleWordHighlightingRule("{Yellow}", ConsoleOutputColor.DarkYellow,
+                                    ConsoleOutputColor.White),
+                                new ConsoleWordHighlightingRule("{Red}", ConsoleOutputColor.DarkRed,
+                                    ConsoleOutputColor.White),
+                                new ConsoleWordHighlightingRule("{Black}", ConsoleOutputColor.Black,
+                                    ConsoleOutputColor.White),
+
+                                new ConsoleWordHighlightingRule("[Trace]", ConsoleOutputColor.DarkGray,
+                                    ConsoleOutputColor.Black),
+                                new ConsoleWordHighlightingRule("[Degub]", ConsoleOutputColor.Gray,
+                                    ConsoleOutputColor.Black),
+                                new ConsoleWordHighlightingRule("[Info]", ConsoleOutputColor.White,
+                                    ConsoleOutputColor.Black),
+                                new ConsoleWordHighlightingRule("[Error]", ConsoleOutputColor.Magenta,
+                                    ConsoleOutputColor.Black),
+                                new ConsoleWordHighlightingRule("[Fatal]", ConsoleOutputColor.Red,
+                                    ConsoleOutputColor.Black),
+                                new ConsoleWordHighlightingRule("[File]", ConsoleOutputColor.Green,
+                                    ConsoleOutputColor.Black),
+                                new ConsoleWordHighlightingRule("[Share]", ConsoleOutputColor.Yellow,
+                                    ConsoleOutputColor.Black),
+                                new ConsoleWordHighlightingRule
+                                {
+                                    CompileRegex = true,
+                                    Regex = @"<.*\|.*\|.*\|.*?>",
+                                    ForegroundColor = ConsoleOutputColor.Cyan,
+                                    BackgroundColor = ConsoleOutputColor.Black
+                                },
+                                new ConsoleWordHighlightingRule
+                                {
+                                    CompileRegex = true,
+                                    Regex = @"^\d\d\d\d-\d\d\-\d\d \d\d:\d\d:\d\d [\+-]\d\d:\d\d ",
+                                    ForegroundColor = ConsoleOutputColor.DarkGray,
+                                    BackgroundColor = ConsoleOutputColor.Black
+                                },
+                                new ConsoleWordHighlightingRule
+                                {
+                                    CompileRegex = true,
+                                    Regex = @"\((?:[^\)]*\)){1}",
+                                    ForegroundColor = ConsoleOutputColor.DarkMagenta,
+                                    BackgroundColor = ConsoleOutputColor.Black
+                                }
+                            }
+                        };
+                        if (LogLevel == LogLevel.Warn)
+                        {
+                            nlogConfig.AddRule(LogLevel.Warn, LogLevel.Warn, logconsole);
+                        }
+                        else
+                        {
+                            nlogConfig.AddRule(LogLevel, LogLevel.Fatal, logconsole);
+                        }
+                        logconsole.Layout = "${message}";
                     }
-                    logconsole.Layout = "${message}";
                 }
 
                 if (Options.LogToFile)
@@ -528,20 +540,34 @@ namespace Snaffler
 
         public void WriteColor(string textToWrite, ConsoleColor fgColor)
         {
-            Console.ForegroundColor = fgColor;
+            if (Options != null && Options.NoColor)
+            {
+                Console.Write(textToWrite);
+            }
+            else
+            {
+                Console.ForegroundColor = fgColor;
 
-            Console.Write(textToWrite);
+                Console.Write(textToWrite);
 
-            Console.ResetColor();
+                Console.ResetColor();
+            }
         }
 
         public void WriteColorLine(string textToWrite, ConsoleColor fgColor)
         {
-            Console.ForegroundColor = fgColor;
+            if (Options != null && Options.NoColor)
+            {
+                Console.WriteLine(textToWrite);
+            }
+            else
+            {
+                Console.ForegroundColor = fgColor;
 
-            Console.WriteLine(textToWrite);
+                Console.WriteLine(textToWrite);
 
-            Console.ResetColor();
+                Console.ResetColor();
+            }
         }
 
         public void PrintBanner()

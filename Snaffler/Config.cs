@@ -104,9 +104,10 @@ namespace Snaffler
             ValueArgument<string> compTargetArg = new ValueArgument<string>('n', "comptarget", "List of computers in a file(e.g C:\targets.txt), a single Computer (or comma separated list) to target.");
             ValueArgument<string> ruleDirArg = new ValueArgument<string>('p', "rulespath", "Path to a directory full of toml-formatted rules. Snaffler will load all of these in place of the default ruleset.");
             ValueArgument<string> logType = new ValueArgument<string>('t', "logtype", "Type of log you would like to output. Currently supported options are plain and JSON. Defaults to plain.");
+            SwitchArgument noColorArg = new SwitchArgument('g', "no-color", "Disables color output to console.", false);
             ValueArgument<string> timeOutArg = new ValueArgument<string>('e', "timeout",
                 "Interval between status updates (in minutes) also acts as a timeout for AD data to be gathered via LDAP. Turn this knob up if you aren't getting any computers from AD when you run Snaffler through a proxy or other slow link. Default = 5");
-            // list of letters i haven't used yet: gnqw
+            // list of letters i haven't used yet: nqw
 
             CommandLineParser.CommandLineParser parser = new CommandLineParser.CommandLineParser();
             parser.Arguments.Add(timeOutArg);
@@ -132,6 +133,7 @@ namespace Snaffler
             parser.Arguments.Add(ruleDirArg);
             parser.Arguments.Add(logType);
             parser.Arguments.Add(compExclusionArg);
+            parser.Arguments.Add(noColorArg);
 
             // extra check to handle builtin behaviour from cmd line arg parser
             if ((args.Contains("--help") || args.Contains("/?") || args.Contains("help") || args.Contains("-h") || args.Length == 0))
@@ -177,6 +179,11 @@ namespace Snaffler
                     {
                         Mq.Info("Invalid type argument passed (" + logType.Value + ") defaulting to plaintext");
                     }
+                }
+
+                if (noColorArg.Parsed)
+                {
+                    parsedConfig.NoColor = true;
                 }
 
                 if (ruleDirArg.Parsed && !String.IsNullOrWhiteSpace(ruleDirArg.Value))

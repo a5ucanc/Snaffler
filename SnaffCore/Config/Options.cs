@@ -50,6 +50,7 @@ namespace SnaffCore.Config
         public bool LogTSV { get; set; } = false;
         public char Separator { get; set; } = ' ';
         public bool LogToConsole { get; set; } = true;
+        public bool NoColor { get; set; } = false;
         public string LogLevelString { get; set; } = "info";
 
         // ShareFinder Options
